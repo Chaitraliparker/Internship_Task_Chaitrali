@@ -1,0 +1,182 @@
+Internship Task 2
+
+Create Database Ola;
+
+Drivers Table:
+CREATE TABLE drivers(driver_id INT PRIMARY KEY,
+                     first_name VARCHAR(100) not null,
+                     last_name VARCHAR(100) not null,
+                     phone VARCHAR(20) not null,
+                     city VARCHAR(50) not null,
+                     vehicleType VARCHAR(50) not null,
+                     rating DECIMAL );
+
+INSERT INTO drivers VALUES
+(501, 'Mukesh', 'Yadav', '9787654323', 'Indore', 'SUV', 6),
+(502, 'Mukesh', 'Yadav', '9988654323', 'Bhopal', 'Sedan', 4),
+(503, 'Rakesh', 'Sharma', '9967654323', 'Indore', 'Hatchback', 3.2),
+(504, 'Mohit', 'Yadav', '8988657323', 'Indore', 'BMW', 5),
+(505, 'Sujal', 'Gupta', '8888654323', 'Ujjain', 'Audi', 4),
+(506, 'Abhishek', 'Nair', '7888654323', 'Indore', 'Audi', 4),
+(507, 'Sunny', 'Gupta', '7788654323', 'Ujjain', 'Audi', 7),
+(508, 'Gopal', 'Singh', '8877654323', 'Indore', 'Alto', 8),
+(509, 'Aditya', 'Singh', '8866654323', 'Ujjain', 'MarutiSuzuki', 4),
+(510, 'Pratik', 'Joshi', '8833654323', 'Indore', 'BMW', 4.5);
+
+
+
+Riders Table:
+CREATE TABLE riders(rider_id INT PRIMARY KEY,
+                     first_name VARCHAR(100) not null,
+                     last_name VARCHAR(100) not null,
+                     phone INT not null,
+                     city VARCHAR(50) not null,
+                   joindate Date);
+
+
+INSERT INTO riders(rider_id, first_name, last_name,  phone, city,  joindate) VALUES
+(601,'Mahendra','Singh',9999654323,'Indore',2019-07-06),
+(602,'Gautam','pal',8888654323,'Indore','2019-08-15'),
+(603,'Nikhil','Sharma',6967654323,'Indore','2020-03-19'),
+(604,'keshav','Sharma',7988657323,'Indore','2020-12-9'),
+(605,'Surendra','Gupta',9988654323,'Indore','2019-11-11'),
+(606,'Suresh','Verma',7988654323,'Bhopal','2020-11-10'),
+(607,'Mahesh','Pal',9977654323,'Indore','2018-10-14'),
+(608,'Mukul','Nair',9966654323,'Ujjain','2019-09-11'),
+(609,'Rachit','Thakur',9988654323,'Rewa','2019-11-17'),
+(610,'Jitendra','Gupta',9988653323,'Indore','2019-10-11');
+
+
+Rides Table:
+CREATE TABLE rides( ride_id INT PRIMARY KEY,
+                     ridedate DATE not null,
+                     pickuplocation VARCHAR(100) not null,
+                    droplocation VARCHAR(100) not null,
+                   distance INT not null,
+                   fare INT not null,
+                   ridestatus VARCHAR(50) not null,
+                      rider_id int not null,
+                   driver_id INT not null,
+                   foreign KEY (rider_id) REFERENCES riders(rider_id),
+                     foreign KEY (driver_id) REFERENCES drivers(driver_id)
+                  );
+
+INSERT INTO rides VALUES
+(101, '2020-09-07', 'MR10', 'RajendraNagar', 22, 250, 'completed', 601, 501),
+(102, '2020-09-07', 'LIG', 'Rajwada', 10, 100, 'completed', 602, 502),
+(103, '2020-08-07', 'MR9', 'Palasiya', 4, 30, 'cancelled', 603, 503),
+(104, '2020-02-07', 'VijayNagar', 'IT Park', 15, 200, 'completed', 604, 504),
+(105, '2020-01-06', 'BapatSquare', 'DewasNaka', 10, 100, 'ongoing', 605, 505),
+(106, '2020-01-05', 'BapatSquare', 'Mangliya', 15, 200, 'ongoing', 606, 506),
+(107, '2020-04-06', 'Radison', 'Patnipura', 15, 200, 'ongoing', 607, 507),
+(108, '2020-08-06', 'Patipura', 'DewasNaka', 20, 250, 'cancelled', 608, 508),
+(109, '2020-01-06', 'StarSquare', 'Mangliya', 22, 250, 'cancelled', 609, 509),
+(110, '2020-01-06', 'BapatSquare', 'DewasNaka', 10, 100, 'completed', 610, 510);
+
+
+
+Payments Table:
+CREATE TABLE payments(
+    payment_id INT PRIMARY KEY,
+    payment_method VARCHAR(50) NOT NULL,
+    Amount INT NOT NULL,
+    payment_date DATE,
+    ride_id INT NOT NULL,
+    FOREIGN KEY (ride_id) REFERENCES rides(ride_id)
+);
+
+INSERT INTO payments VALUES
+(2001, 'cash', 50, '2020-09-07', 101),
+(2002, 'card', 100, '2020-09-07', 102),
+(2003, 'cash', 30, '2020-08-07', 103),
+(2004, 'wallet', 200, '2020-02-07', 104),
+(2005, 'pending', 50, '2020-01-06', 105),
+(2006, 'pending', 200, '2020-01-05', 106),
+(2007, 'card', 200, '2020-04-06', 107),
+(2008, 'UPI', 100, '2020-08-06', 108),
+(2009, 'card', 200, '2020-01-06', 109),
+(2010, 'cash', 100, '2020-01-06', 110);
+
+
+
+
+1. Retrieve the names and contact details of all drivers with a rating of 4.5 or higher.
+SELECT first_name,phone,rating 
+FROM drivers
+WHERE rating>=4.5;
+
+
+2. Find the total number of rides completed by each driver.
+SELECT d.driver_id, d.first_name, COUNT(*) AS total_completed_rides
+FROM rides r
+JOIN drivers d ON r.driver_id = d.driver_id
+WHERE r.ridestatus = 'completed'
+GROUP BY d.driver_id, d.first_name;
+
+
+3. List all riders who had never booked a ride.
+SELECT r.rider_id, r.first_name, r.last_name, r.phone, r.city, r.joinDate
+FROM riders r
+LEFT JOIN rides rd ON r.rider_id = rd.rider_id
+WHERE rd.ride_id is NULL
+
+
+
+4. Calculate the total earnings of each driver from completed rides.
+SELECT driver_id, SUM(fare) AS total_earnings
+FROM rides
+WHERE ridestatus = 'completed'
+GROUP BY driver_id;
+
+
+5. Retrieve the most recent ride for each rider.
+SELECT  r.rider_id, r.first_name,r.last_name, rd.ride_id, rd.ridedate, rd.pickuplocation, rd.droplocation, rd.fare, rd.ridestatus
+FROM  riders r
+JOIN rides rd ON r.rider_id = rd.rider_id
+WHERE rd.ridedate = (
+        SELECT MAX(r2.ridedate)
+        FROM rides r2
+        WHERE r2.rider_id = r.rider_id
+    );
+
+
+6. Count the number of rides taken in each city.
+SELECT r.city, COUNT(rd.ride_id) AS total_rides
+FROM  rides rd
+JOIN  riders r ON rd.rider_id = r.rider_id
+GROUP BY r.city;
+
+
+7. List all rides where the distance was greater than 20 km.
+SELECT * FROM rides
+WHERE distance > 20;
+
+
+8. Identify the most preferred payment method.
+
+9. Find the top 3 highest-earning drivers.
+SELECT d.driver_id, d.first_name, d.last_name,SUM(r.fare) AS total_earning
+FROM drivers d
+JOIN rides r ON d.driver_id = r.driver_id
+WHERE r.ridestatus = 'completed'
+GROUP BY d.driver_id, d.first_name, d.last_name
+ORDER BY total_earning DESC
+LIMIT 3;
+
+
+10. Retrieve details of all cancelled rides along with the rider's and driver's names
+SELECT  r.ride_id, r.ridedate, r.pickuplocation, r.droplocation, r.distance,
+    r.fare, r.ridestatus, rd.first_name AS rider_first_name,
+    rd.last_name AS rider_last_name,
+    dd.first_name AS driver_first_name,
+    dd.last_name AS driver_last_name
+FROM  rides r
+JOIN riders rd ON r.rider_id = rd.rider_id
+JOIN  drivers dd ON r.driver_id = dd.driver_id
+WHERE  r.ridestatus = 'cancelled';
+
+
+
+
+
+

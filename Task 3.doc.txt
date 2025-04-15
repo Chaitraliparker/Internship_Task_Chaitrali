@@ -1,0 +1,224 @@
+Internship Task 3
+
+Create Database retail;
+
+Customers table:
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    address TEXT NOT NULL,
+    join_date DATE NOT NULL
+);
+
+
+INSERT INTO customers VALUES
+(301,'Priya','Jain','priya01@gmail.com','9977980976','76,vijaynagar','2018-09-22'),
+(302,'Nandini','Saini','nandini@gmail.com','8877980976','67,BapatSquare','2017-09-22'),
+(303,'Megha','Yadav','megha05@gmail.com','9877980976','204 SatyaSai','2018-09-22'),
+(304,'Rahul','Jain','rahul@gmail.com','9777980976','LIG','2019-10-20'),
+(305,'Neeta','Kumawat','neeta45@gmail.com','7777980976','76,Rajwada','2018-09-22'),
+(306,'Amit','Jain','amit@gmail.com','8977980975','palasiya','2020-07-17'),
+(307,'Riya','Sharma','riya01@gmail.com','6677980976','vijaynagar','2018-09-22'),
+(308,'Gaurav','Jain','gaurav@gmail.com','7867980976','KesharBagh','2018-07-22'),
+(309,'Priya','Patil','priya@gmail.com','8897980976','78,vijaynagar','2018-09-22'),
+(310,'Richa','Patel','richa@gmail.com','999980976','67,Paldanaka','2017-09-23');
+
+
+
+Products Table:
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    stock_quantity INT NOT NULL
+);
+
+
+INSERT INTO products VALUES(5001,'iphone14','Electronics',79999.00,10),
+(5002,'T-shirt','Clothes',5999.00,12),
+(5003,'Jeans','Clothes',999.00,10),
+(5004,'Smartwatch','Electronics',76999.00,10),
+(5005,'Bluetooth Speaker','Electronics',59999.00,30),
+(5006,'LED TV','Electronics',99999.00,30),
+(5007,'Rice','Grocery',200.00,20),
+(5008,'Sugar','Grocery',699.00,20),
+(5009,'Laptop','Electronics',50000.00,40),
+(5010,'cooking oil','Grocery',799.00,40);
+
+
+
+Orders Table:
+CREATE TABLE orders(order_id INT PRIMARY KEY,
+                      order_date DATE,
+                     total_amount DECIMAL(10,2)  ,
+                     order_status VARCHAR(20) not null,
+                     customer_id INT,
+                     Foreign Key(customer_id)References customers(customer_id));
+
+INSERT INTO orders VALUES(3001,'2020-09-08','5999','completed',301),
+(3002,'2020-07-08','999','shipped',302),
+(3003,'2020-09-13','7999','completed',303),
+(3004,'2020-09-08','5789','completed',304),
+(3005,'2020-10-08','5999','completed',305),
+(3006,'2020-08-05','60000','processing',306),
+(3007,'2020-09-08','7899','shipped',307),
+(3008,'2020-09-07','3999','cancelled',308),
+(3009,'2020-10-06','999','cancelled',309),
+(3010,'2020-11-08','6999','pending',310);
+
+
+OrderDetails Table:
+CREATE TABLE orderdetails (
+    order_detail_id INT PRIMARY KEY,
+    quantity INT,
+    unit_price DECIMAL(10,2),
+    order_id INT,
+    product_id INT,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id));
+
+INSERT INTO orderdetails (order_detail_id, quantity, unit_price, order_id, product_id) VALUES
+(1, 2, 19.99, 3001, 5001),
+(2, 1, 19.99, 3001, 5002),
+(3, 5, 19.99, 3001, 5003),
+(4, 3, 19.99, 3001, 5004),
+(5, 4, 19.99, 3001, 5005),
+(6, 6, 19.99, 3001, 5006),
+(7, 2, 19.99, 3001, 5007),
+(8, 3, 19.99, 3001, 5008),
+(9, 1, 19.99, 3001, 5009),
+(10, 2, 19.99, 3001, 5010);
+
+
+
+
+Payments Table:
+CREATE TABLE payments(payment_id INT PRIMARY KEY,
+                      payment_date DATE,
+                     payment_amount DECIMAL(10,2)  ,
+                     payment_method VARCHAR(20) not null,
+                     order_id INT,
+                     Foreign Key(order_id)References orders(order_id));
+
+INSERT INTO payments VALUES
+(401, '2022-09-07', '5678', 'cash', 3001),
+(402, '2022-09-12', '5644', 'cash', 3002),
+(403, '2022-12-07', '4567', 'card', 3003),
+(404, '2022-09-07', '0999', 'cash', 3004),
+(405, '2022-08-07', '4500', 'cash', 3005),
+(406, '2022-10-07', '5500', 'card', 3006),
+(407, '2022-08-07', '3400', 'UPI', 3007),
+(408, '2022-09-03', '5999', 'card', 3008),
+(409, '2022-07-07', '3999', 'card', 3009),
+(410, '2022-06-05', '5999', 'cash', 3010);
+
+
+
+1. Find the total Number of orders of Each customer.
+SELECT customer_id, COUNT(order_id) AS total_orders
+FROM orders
+GROUP BY customer_id;
+
+
+2. Find the Total Sales Amount for Each product(Revenue per product).
+SELECT p.product_id, p.product_name, SUM(od.quantity * od.unit_price) AS total_sales
+FROM products p
+JOIN orderdetails od ON p.product_id = od.product_id
+GROUP BY p.product_id, p.product_name
+ORDER BY total_sales DESC;
+
+
+3. Find the Most Expensive product sold.
+SELECT product_id, product_name, price AS product_price
+FROM products
+ORDER BY price DESC
+LIMIT 1;
+
+
+4. Get the List of customers who have never placed orders on the last 30 days.
+SELECT c.customer_id, c.first_name, c.last_name, c.email, c.phone
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+WHERE o.order_date >= CURDATE() - INTERVAL 30 DAY;
+
+
+
+5. Calculate the Total Amount paid by Each customer.
+SELECT c.customer_id, c.first_name, c.last_name, SUM(p.payment_amount) AS total_amount_paid
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+JOIN payments p ON o.order_id = p.order_id
+GROUP BY c.customer_id, c.first_name, c.last_name;
+
+
+
+6. Get the Number of Products Sold by Category.
+SELECT  p.category,
+    SUM(od.quantity) AS total_products_sold
+FROM  orderdetails od
+JOIN products p ON od.product_id = p.product_id
+GROUP BY p.category
+ORDER BY total_products_sold DESC;
+
+
+
+7. List All Orders that are pending(i.eOrders that haven't shipped yet).
+SELECT * FROM orders
+WHERE order_status = 'Pending';
+
+
+8. Find the Average order Value(Total Order Amount/ Number of Orders).
+SELECT
+AVG(total_amount)AS average_order_value
+FROM orders;
+
+
+
+9. List the top 5 Customers Who have spent the most money.
+SELECT c.customer_id, c.first_name, c.last_name, SUM(o.total_amount) AS total_spent
+FROM orders o
+JOIN customers c ON o.customer_id = c.customer_id
+GROUP BY c.customer_id, c.first_name, c.last_name
+ORDER BY total_spent DESC
+LIMIT 5;
+
+
+
+10. Find the Products that have never been sold.
+SELECT p.product_id, p.product_name
+FROM products p
+LEFT JOIN orderdetails od ON p.product_id = od.product_id
+WHERE od.product_id IS NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+             
+                       
+
+
